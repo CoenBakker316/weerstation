@@ -36,13 +36,11 @@ def upload():
     conn = sqlite3.connect("weather.db")
     c = conn.cursor()
 
-    # Nieuwe meting opslaan
     c.execute("""
         INSERT INTO measurements (temperature, humidity, pressure)
         VALUES (?, ?, ?)
     """, (temp, hum, pres))
 
-    # Oude data verwijderen (ouder dan 1 uur)
     c.execute("""
         DELETE FROM measurements
         WHERE timestamp < datetime('now', '-1 hour')
