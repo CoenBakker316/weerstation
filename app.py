@@ -79,52 +79,141 @@ def index():
         <title>Weerstation</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <style>
+            body { background:#111; color:white; font-family:Arial; text-align:center; }
+
+            /* Blokjes */
+            .cards {
+                display:flex;
+                justify-content:center;
+                gap:20px;
+                margin:20px auto;
+                flex-wrap:wrap;
+            }
+            .card {
+                background:#222;
+                padding:20px;
+                border-radius:10px;
+                width:150px;
+                box-shadow:0 0 10px #000;
+            }
+            .value {
+                font-size:32px;
+                font-weight:bold;
+                margin-top:10px;
+            }
+
+            /* Tabbladen */
+            .tabs {
+                display:flex;
+                justify-content:center;
+                margin-top:20px;
+            }
+            .tab {
+                padding:10px 20px;
+                margin:0 5px;
+                background:#222;
+                border-radius:5px;
+                cursor:pointer;
+            }
+            .tab.active { background:#444; }
+
+            .chart-container { display:none; }
+            .chart-container.active { display:block; }
+        </style>
     </head>
-    <body style="background:#111; color:white; font-family:Arial; text-align:center;">
+
+    <body>
         <h1>Weerstation – Live</h1>
-        <canvas id="chart" style="width:100%; height:300px;"></canvas>
+
+        <!-- Bovenste blokjes -->
+        <div class="cards">
+            <div class="card">
+                <div>Temperatuur</div>
+                <div id="tempVal" class="value">-- °C</div>
+            </div>
+
+            <div class="card">
+                <div>Luchtvochtigheid</div>
+                <div id="humVal" class="value">-- %</div>
+            </div>
+
+            <div class="card">
+                <div>Luchtdruk</div>
+                <div id="presVal" class="value">-- hPa</div>
+            </div>
+        </div>
+
+        <!-- Tabbladen -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab(0)">Temperatuur</div>
+            <div class="tab" onclick="showTab(1)">Vochtigheid</div>
+            <div class="tab" onclick="showTab(2)">Luchtdruk</div>
+        </div>
+
+        <!-- Grafieken -->
+        <div id="chart0" class="chart-container active">
+            <canvas id="tempChart"></canvas>
+        </div>
+
+        <div id="chart1" class="chart-container">
+            <canvas id="humChart"></canvas>
+        </div>
+
+        <div id="chart2" class="chart-container">
+            <canvas id="presChart"></canvas>
+        </div>
 
         <script>
+        function showTab(index) {
+            document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active', i===index));
+            document.querySelectorAll('.chart-container').forEach((c,i)=>c.classList.toggle('active', i===index));
+        }
+
         async function loadData() {
             const res = await fetch('/data');
             const data = await res.json();
+
+            if (data.length > 0) {
+                const last = data[data.length - 1];
+
+                document.getElementById('tempVal').innerText = last[1].toFixed(1) + " °C";
+                document.getElementById('humVal').innerText  = last[2].toFixed(1) + " %";
+                document.getElementById('presVal').innerText = last[3].toFixed(1) + " hPa";
+            }
 
             const labels = data.map(r => r[0]);
             const temp = data.map(r => r[1]);
             const hum  = data.map(r => r[2]);
             const pres = data.map(r => r[3]);
 
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = temp;
-            chart.data.datasets[1].data = hum;
-            chart.data.datasets[2].data = pres;
+            tempChart.data.labels = labels;
+            tempChart.data.datasets[0].data = temp;
+            tempChart.update();
 
-            chart.update();
+            humChart.data.labels = labels;
+            humChart.data.datasets[0].data = hum;
+            humChart.update();
+
+            presChart.data.labels = labels;
+            presChart.data.datasets[0].data = pres;
+            presChart.update();
         }
 
-        const ctx = document.getElementById('chart').getContext('2d');
-        const chart = new Chart(ctx, {
+        const tempChart = new Chart(document.getElementById('tempChart'), {
             type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'Temperatuur (°C)',
-                        data: [],
-                        borderColor: 'red'
-                    },
-                    {
-                        label: 'Luchtvochtigheid (%)',
-                        data: [],
-                        borderColor: 'cyan'
-                    },
-                    {
-                        label: 'Luchtdruk (hPa)',
-                        data: [],
-                        borderColor: 'yellow'
-                    }
-                ]
-            }
+            data: { labels: [], datasets: [{ label:'Temperatuur (°C)', borderColor:'red', data:[] }] }
+        });
+
+        const humChart = new Chart(document.getElementById('humChart'), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label:'Vochtigheid (%)', borderColor:'cyan', data:[] }] }
+        });
+
+        const presChart = new Chart(document.getElementById('presChart'), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label:'Luchtdruk (hPa)', borderColor:'yellow', data:[] }] }
         });
 
         setInterval(loadData, 2000);
