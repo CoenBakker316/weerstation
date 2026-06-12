@@ -102,6 +102,7 @@ def index():
                 font-size:32px;
                 font-weight:bold;
                 margin-top:10px;
+                transition:0.3s;
             }
 
             /* Tabbladen */
@@ -178,9 +179,19 @@ def index():
             if (data.length > 0) {
                 const last = data[data.length - 1];
 
-                document.getElementById('tempVal').innerText = last[1].toFixed(1) + " °C";
-                document.getElementById('humVal').innerText  = last[2].toFixed(1) + " %";
-                document.getElementById('presVal').innerText = last[3].toFixed(1) + " hPa";
+                const t = last[1];
+                const h = last[2];
+                const p = last[3];
+
+                // waarden invullen
+                document.getElementById('tempVal').innerText = t.toFixed(1) + " °C";
+                document.getElementById('humVal').innerText  = h.toFixed(1) + " %";
+                document.getElementById('presVal').innerText = p.toFixed(1) + " hPa";
+
+                // kleurregels
+                document.getElementById('tempVal').style.color = t > 30 ? "red" : "white";
+                document.getElementById('humVal').style.color  = h > 80 ? "red" : "white";
+                document.getElementById('presVal').style.color = p < 990 ? "red" : "white";
             }
 
             const labels = data.map(r => r[0]);
@@ -222,6 +233,7 @@ def index():
     </body>
     </html>
     """
+
 # -----------------------------
 # RENDER START
 # -----------------------------
