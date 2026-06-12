@@ -91,9 +91,14 @@ def index():
 
             const labels = data.map(r => r[0]);
             const temp = data.map(r => r[1]);
+            const hum  = data.map(r => r[2]);
+            const pres = data.map(r => r[3]);
 
             chart.data.labels = labels;
             chart.data.datasets[0].data = temp;
+            chart.data.datasets[1].data = hum;
+            chart.data.datasets[2].data = pres;
+
             chart.update();
         }
 
@@ -102,11 +107,23 @@ def index():
             type: 'line',
             data: {
                 labels: [],
-                datasets: [{
-                    label: 'Temperatuur (°C)',
-                    data: [],
-                    borderColor: 'red'
-                }]
+                datasets: [
+                    {
+                        label: 'Temperatuur (°C)',
+                        data: [],
+                        borderColor: 'red'
+                    },
+                    {
+                        label: 'Luchtvochtigheid (%)',
+                        data: [],
+                        borderColor: 'cyan'
+                    },
+                    {
+                        label: 'Luchtdruk (hPa)',
+                        data: [],
+                        borderColor: 'yellow'
+                    }
+                ]
             }
         });
 
@@ -116,7 +133,6 @@ def index():
     </body>
     </html>
     """
-
 # -----------------------------
 # RENDER START
 # -----------------------------
